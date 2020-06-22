@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "788800027315",
+    "firebase_url": "https://e-commerce-571d5.firebaseio.com",
+    "project_id": "e-commerce-571d5",
+    "storage_bucket": "e-commerce-571d5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:788800027315:android:1a3e586811e9b4b52f4ec6",
+        "android_client_info": {
+          "package_name": "com.example.loginui"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "788800027315-enda0vsd1q2avah22motpofovl30lr6i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.loginui",
+            "certificate_hash": "a1f03730a7e944518b80f062db89c1e2dda688cf"
+          }
+        },
+        {
+          "client_id": "788800027315-oa65eoqncdib2q5d6uj1p1hsrd34luc5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBw7RcZHDqVb3jVtkD_WJtsbZywT_EwYEg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "788800027315-oa65eoqncdib2q5d6uj1p1hsrd34luc5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
