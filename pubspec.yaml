@@ -38,8 +38,11 @@ dependencies:
   auto_size_text:
   flutter_staggered_grid_view:
   get:
-
-
+  dio:
+  file_utils:
+  path_provider:
+  permission_handler: 4.4.0
+  ext_storage: any
 #  image_picker: ^0.6.3+4
 
 dev_dependencies:

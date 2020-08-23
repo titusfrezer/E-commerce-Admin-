@@ -27,7 +27,7 @@ class _AdminMultiSelectSpecificState extends State<AdminMultiSelectSpecific> {
             List myList = map.values.toList();
             for (int index = 0; index < myList.length; index++) {
               if (myList[index]["type"] == widget.categoryName) {
-                myList.removeAt(index);
+                myList.removeAt(index); // help to remove from the ui(to don't be duplicated)
               }
             }
             print(myList.length);

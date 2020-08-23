@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:connectivity/connectivity.dart';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -17,10 +18,14 @@ import 'package:loginui/UI/Admin/controlUser.dart';
 import 'package:loginui/UI/Admin/todayTransaction.dart';
 import 'package:loginui/auth_service.dart';
 import 'package:loginui/variables/CategoriesList.dart';
-
+import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 import 'package:loginui/variables/vars.dart';
+import 'package:permission_handler/permission_handler.dart';
 FirebaseAuth _auth;
 FirebaseUser user;
+var dir;
 class AddCategory extends StatefulWidget {
   @override
   _AddCategoryState createState() => _AddCategoryState();
@@ -36,11 +41,17 @@ class _AddCategoryState extends State<AddCategory> {
 
     print(user.email.toString());
   }
+  void getPermission() async {
+     dir = await getExternalStorageDirectory();
+    print("getPermission");
+    Map<PermissionGroup, PermissionStatus> permissions =
+    await PermissionHandler().requestPermissions([PermissionGroup.storage]);
+  }
   void initState(){
     super.initState();
     _auth = FirebaseAuth.instance;
     getCurrentUser();
-
+     getPermission();
   }
   @override
   Widget build(BuildContext context) {
@@ -118,6 +129,20 @@ class _AddCategoryState extends State<AddCategory> {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(
                         MaterialPageRoute(builder: (context) => PostDigitalDocument()));
+                  },
+                ),
+                InkWell(
+                  child: ListTile(
+                    title: Text('download Digital documents'),
+                    leading: Icon(
+                      Icons.visibility,
+                      color: background,
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => FileDownloader()));
                   },
                 ),
                 InkWell(
@@ -281,4 +306,69 @@ class PostDigitalDocument extends StatelessWidget {
       )
     );
   }
+}
+class FileDownloader extends StatelessWidget {
+  var dio = Dio();
+
+  Future download(Dio dio, String url, String savePath) async {
+    try {
+      Response response = await dio.get(
+        url,
+        onReceiveProgress: showDownloadProgress,
+        //Received data with List<int>
+        options: Options(
+            responseType: ResponseType.bytes,
+            followRedirects: false,
+            validateStatus: (status) {
+              return status < 500;
+            }),
+      );
+      print(response.headers);
+      File file = File(savePath);
+      var raf = file.openSync(mode: FileMode.write);
+      // response.data is List<int> type
+      raf.writeFromSync(response.data);
+      await raf.close();
+    } catch (e) {
+      print(e);
+    }
+  }
+
+void showDownloadProgress(received, total) {
+  if (total != -1) {
+    print((received / total * 100).toStringAsFixed(0) + "%");
+  }
+}
+Widget build(BuildContext context){
+  List<FileSystemEntity> _files;
+  var testdir = '${dir.path}/Afroel';
+
+  _files = testdir.listSync(recursive: true, followLinks: false);
+  return  ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemCount: _files.length,
+      itemBuilder: (context, i) {
+        return _buildRow(_files.elementAt(i).path);
+      });
+//     return Container(
+//       child:RaisedButton(
+//         child:Text('Download'),
+//         onPressed: () async{
+////           String path =
+////           await ExtStorage.getExternalStoragePublicDirectory(
+////               ExtStorage.DIRECTORY_DOWNLOADS);
+//
+//           var dir = await getExternalStorageDirectory();
+//           var testdir = await Directory('${dir.path}/Afroel').create(recursive: true);
+//           //String fullPath = tempDir.path + "/boo2.pdf'";
+//           String fullPath = "${testdir.path}/test.pdf";
+//           print('full path is ${fullPath}');
+//           List<FileSystemEntity> _files;
+//           _files = testdir.listSync(recursive: true, followLinks: false);
+//           print(_files);
+//           await download(dio, 'https://firebasestorage.googleapis.com/v0/b/e-commerce-571d5.appspot.com/o/56637073965850845979923069195869252305.pdf?alt=media&token=045dec96-8750-413c-9ab8-a524c9e42935', fullPath);
+//         },
+//       )
+//     );
+}
 }
