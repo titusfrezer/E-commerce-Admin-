@@ -11,6 +11,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_file_manager/flutter_file_manager.dart';
+import 'package:flutter_full_pdf_viewer/full_pdf_viewer_scaffold.dart';
 import 'package:loginui/UI/Admin/CategoriesList2.dart';
 import 'package:loginui/UI/Admin/Post.dart';
 import 'package:loginui/UI/Admin/Transaction.dart';
@@ -26,6 +28,7 @@ import 'package:permission_handler/permission_handler.dart';
 FirebaseAuth _auth;
 FirebaseUser user;
 var dir;
+var files;
 class AddCategory extends StatefulWidget {
   @override
   _AddCategoryState createState() => _AddCategoryState();
@@ -38,7 +41,14 @@ class _AddCategoryState extends State<AddCategory> {
   getCurrentUser() async {
     user = await _auth.currentUser();
     connectivity = await (Connectivity().checkConnectivity());
+    var testdir = await Directory('${dir.path}/Afroel');
+    var fm = FileManager(root: Directory(testdir.path));
+     files = await fm.filesTree(
+        excludedPaths: ["/storage/emulated/1/Android"],
+        extensions: ["pdf"] //optional, to filter files, list only pdf files
 
+    );
+    print(files.length);
     print(user.email.toString());
   }
   void getPermission() async {
@@ -325,6 +335,7 @@ class FileDownloader extends StatelessWidget {
       );
       print(response.headers);
       File file = File(savePath);
+
       var raf = file.openSync(mode: FileMode.write);
       // response.data is List<int> type
       raf.writeFromSync(response.data);
@@ -340,16 +351,32 @@ void showDownloadProgress(received, total) {
   }
 }
 Widget build(BuildContext context){
-  List<FileSystemEntity> _files;
-  var testdir = '${dir.path}/Afroel';
 
-  _files = testdir.listSync(recursive: true, followLinks: false);
-  return  ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: _files.length,
-      itemBuilder: (context, i) {
-        return _buildRow(_files.elementAt(i).path);
-      });
+  return Scaffold(
+      appBar: AppBar(
+          title:Text("PDF File list from SD Card"),
+          backgroundColor: Colors.redAccent
+      ),
+      body:files == null? Text("Searching Files"):
+      ListView.builder(  //if file/folder list is grabbed, then show here
+        itemCount: files?.length ?? 0,
+        itemBuilder: (context, index) {
+          return Card(
+              child:ListTile(
+                title: Text(files[index].path.split('/').last),
+                leading: Icon(Icons.picture_as_pdf),
+                trailing: Icon(Icons.arrow_forward, color: Colors.redAccent,),
+                onTap: (){
+                  Navigator.push(context, MaterialPageRoute(builder: (context){
+                    return ViewPDF(pathPDF:files[index].path.toString());
+                    //open viewPDF page on click
+                  }));
+                },
+              )
+          );
+        },
+      )
+  );
 //     return Container(
 //       child:RaisedButton(
 //         child:Text('Download'),
@@ -357,18 +384,48 @@ Widget build(BuildContext context){
 ////           String path =
 ////           await ExtStorage.getExternalStoragePublicDirectory(
 ////               ExtStorage.DIRECTORY_DOWNLOADS);
-//
+//           var testdir;
 //           var dir = await getExternalStorageDirectory();
-//           var testdir = await Directory('${dir.path}/Afroel').create(recursive: true);
+//           bool checkDirectory= await Directory('${dir.path}/Afroel').exists();
+//           if(!checkDirectory){
+//            testdir = await Directory('${dir.path}/Afroel').create(recursive: true);
+//
+//           }
+//           else{
+//             testdir = await Directory('${dir.path}/Afroel');
+//
+//           }
+//
 //           //String fullPath = tempDir.path + "/boo2.pdf'";
 //           String fullPath = "${testdir.path}/test.pdf";
 //           print('full path is ${fullPath}');
 //           List<FileSystemEntity> _files;
 //           _files = testdir.listSync(recursive: true, followLinks: false);
 //           print(_files);
+//           var fm = FileManager(root: Directory(testdir.path));
+//           var files = await fm.filesTree(
+//               excludedPaths: ["/storage/emulated/1/Android"],
+//               extensions: ["pdf"] //optional, to filter files, list only pdf files
+//           );
+//           print(files.length);
 //           await download(dio, 'https://firebasestorage.googleapis.com/v0/b/e-commerce-571d5.appspot.com/o/56637073965850845979923069195869252305.pdf?alt=media&token=045dec96-8750-413c-9ab8-a524c9e42935', fullPath);
 //         },
 //       )
 //     );
 }
+}
+class ViewPDF extends StatelessWidget {
+  String pathPDF = "";
+  ViewPDF({this.pathPDF});
+
+  @override
+  Widget build(BuildContext context) {
+    return PDFViewerScaffold( //view PDF
+        appBar: AppBar(
+          title: Text("Document"),
+          backgroundColor: Colors.deepOrangeAccent,
+        ),
+        path: pathPDF
+    );
+  }
 }

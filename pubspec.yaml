@@ -42,7 +42,8 @@ dependencies:
   file_utils:
   path_provider:
   permission_handler: 4.4.0
-  ext_storage: any
+  flutter_file_manager: ^0.2.0
+  flutter_full_pdf_viewer: ^1.0.6
 #  image_picker: ^0.6.3+4
 
 dev_dependencies:
